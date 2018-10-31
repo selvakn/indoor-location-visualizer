@@ -1,76 +1,126 @@
 <html>
-	<head>
-		<title>trilateration.js</title>
-		<script type="text/javascript" src="trilateration.js"></script>
-	</head>
-	<body>
-		<canvas id="canvas1" width="800" height="800">
-		</canvas>
 
-		<script type="text/javascript">
-			var canvas, ctx;
+<head>
+	<title>trilateration.js</title>
+	<script type="text/javascript" src="trilateration.js"></script>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<style type="text/css">
+		body {
+			padding: 10px 10px 0 10px;
+		}
 
-			function initialize()
-			{
-				canvas = document.getElementById("canvas1");
-				ctx = canvas.getContext("2d");
+		svg {
+			height: 90%;
+		}
+	</style>
+</head>
 
-				p1 = { x:   0, y:   0, z: 0, r: 320 };
-				p2 = { x: 500, y: 200, z: 0, r: 370 };
-				p3 = { x: 400, y: 500, z: 0, r: 350 };
+<body>
+	<svg></svg>
 
-				p4 = trilaterate(p1, p2, p3);
 
-				if (p4 !== null)
-				{
-					ctx.fillStyle = "#111";
-				}
-				else
-				{
-					ctx.fillStyle = "#800";
-				}
-				ctx.fillRect(0, 0, canvas.width, canvas.height);
+	<script type="text/javascript">
+		var transform = d3.zoomIdentity.translate(0, 0).scale(1);
+		var zoom = d3.zoom().on("zoom", handleZoom);
 
-				ctx.fillStyle = "#f00";
-				ctx.strokeStyle = ctx.fillStyle;
-				ctx.fillRect(20 + p1.x - 2, 20 + p1.y - 2, 5, 5);
-				ctx.beginPath();
-				ctx.arc(20 + p1.x, 20 + p1.y, p1.r, 0, 2 * Math.PI);
-				ctx.stroke();
+		var svg = d3.select("svg")
+			.attr("width", "100%")
+			.style("background", "#E8EAED")
+			.call(zoom)
+			.call(zoom.transform, transform);
 
-				ctx.fillStyle = "#0f0";
-				ctx.strokeStyle = ctx.fillStyle;
-				ctx.fillRect(20 + p2.x - 2, 20 + p2.y - 2, 5, 5);
-				ctx.beginPath();
-				ctx.arc(20 + p2.x, 20 + p2.y, p2.r, 0, 2 * Math.PI);
-				ctx.stroke();
+		var zoomable = svg
+			.append("g")
+			.attr("class", "zoomable")
+			.attr("transform", transform);
 
-				ctx.fillStyle = "#00f";
-				ctx.strokeStyle = ctx.fillStyle;
-				ctx.fillRect(20 + p3.x - 2, 20 + p3.y - 2, 5, 5);
-				ctx.beginPath();
-				ctx.arc(20 + p3.x, 20 + p3.y, p3.r, 0, 2 * Math.PI);
-				ctx.stroke();
+		function handleZoom() {
+			if (zoomable) {
+				zoomable.attr("transform", d3.event.transform);
+			}
+		};
 
-				if (p4 !== null)
-				{
-					if (p4 instanceof Array)
-					{
-						ctx.fillStyle = "#0ff";
-						ctx.fillRect(20 + p4[0].x - 2, 20 + p4[0].y - 2, 5, 5);
 
-						ctx.fillStyle = "#ff0";
-						ctx.fillRect(20 + p4[1].x - 2, 20 + p4[1].y - 2, 5, 5);
-					}
-					else
-					{
-						ctx.fillStyle = "#fff";
-						ctx.fillRect(20 + p4.x - 2, 20 + p4.y - 2, 5, 5);
-					}
-				}
+		function initialize() {
+
+			const p1 = {
+				x: 0,
+				y: 0,
+				z: 0,
+				r: 320
+			};
+			const p2 = {
+				x: 500,
+				y: 200,
+				z: 0,
+				r: 370
+			};
+			const p3 = {
+				x: 400,
+				y: 500,
+				z: 0,
+				r: 350
+			};
+
+			const p4 = trilaterate(p1, p2, p3);
+
+			var p1Center = zoomable.append("circle")
+				.attr("cx", p1.x)
+				.attr("cy", p1.y)
+				.style("fill", "#f00")
+				.attr("r", 5);
+
+			var p1Circle = zoomable.append("circle")
+				.attr("cx", p1.x)
+				.attr("cy", p1.y)
+				.style("fill-opacity", 0.1)
+				.style("fill", "#f00")
+				.attr("r", p1.r);
+
+
+			var p2Center = zoomable.append("circle")
+				.attr("cx", p2.x)
+				.attr("cy", p2.y)
+				.style("fill", "#0f0")
+				.attr("r", 5);
+
+			var p2Circle = zoomable.append("circle")
+				.attr("cx", p2.x)
+				.attr("cy", p2.y)
+				.style("fill-opacity", 0.1)
+				.style("fill", "#0f0")
+				.attr("r", p2.r);
+
+
+			var p3Center = zoomable.append("circle")
+				.attr("cx", p3.x)
+				.attr("cy", p3.y)
+				.style("fill", "#00f")
+				.attr("r", 5);
+
+			var p3Circle = zoomable.append("circle")
+				.attr("cx", p3.x)
+				.attr("cy", p3.y)
+				.style("fill-opacity", 0.1)
+				.style("fill", "#00f")
+				.attr("r", p3.r);
+
+
+			if (p4 == null) {
+				return;
 			}
 
-			window.onload = initialize;
-		</script>
-	</body>
+			[p4].flat().forEach(p => {
+				zoomable.append("circle")
+					.attr("cx", p.x)
+					.attr("cy", p.y)
+					.style("fill", "#fff")
+					.attr("r", 5);
+			})
+		}
+
+		window.onload = initialize;
+	</script>
+</body>
+
 </html>
